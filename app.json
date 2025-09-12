@@ -13,14 +13,27 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.guilherme.aulaauth",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notication",
+          "remote-notication"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "useNextNotificationApi": true,
+      "package": "com.guilherme.aulaauth"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "web": {
       "favicon": "./assets/favicon.png"
