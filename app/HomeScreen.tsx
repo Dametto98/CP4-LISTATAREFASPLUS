@@ -27,8 +27,12 @@ export default function HomeScreen() {
 
   interface Item{
     id:string,
-    nomeProduto:string,
-    isChecked:boolean
+    title:string,
+    description:string,
+    completed:boolean,
+    dueDate:string,
+    createdAt:string,
+    updatedAt:string
   }
   const[listaItems,setListaItems]=useState<Item[]>([])
 
@@ -63,21 +67,6 @@ export default function HomeScreen() {
         }
       ]
     )
-  }
-
-  const salvarItem = async ()=>{
-    try{
-      const docRef = await addDoc(collection(db,'items'),{
-        nomeProduto:nomeProduto,
-        isChecked:false
-      })
-      console.log("Produto criado com o ID: ",docRef.id);
-      setNomeProduto('')//Limpa o Text Input
-      Alert.alert("Sucesso","Produto salvo com sucesso!")
-    }catch(e){
-      console.log("Erro ao criar o produto: ",e);
-      
-    }
   }
 
   const buscarProdutos = async ()=>{
@@ -181,14 +170,6 @@ export default function HomeScreen() {
             }}
           />
         )}
-
-        <TextInput
-          placeholder="Digite o nome do produto"
-          style={styles.input}
-          value={nomeProduto}
-          onChangeText={(value)=>setNomeProduto(value)}
-          onSubmitEditing={salvarItem}
-        />
 
     </SafeAreaView>
   )

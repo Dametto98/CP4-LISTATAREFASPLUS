@@ -14,7 +14,6 @@ export default function CadastroScreen() {
 
   const router = useRouter();
 
-  // Função para simular o envio do formulário
   const handleCadastro = async() => {
     const user = auth.currentUser;
     if (!title || !description || !dueDate) {
