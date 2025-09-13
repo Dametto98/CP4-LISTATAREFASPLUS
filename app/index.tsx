@@ -5,8 +5,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../src/services/firebaseConfig';
-// import { useTheme } from '../src/context/ThemeContext';
-// import ThemeToggleButton from '../src/components/ThemeToggleButton';
+import { useTheme } from '../src/context/ThemeContext';
+import ThemeToggleButton from '../src/components/ThemeToggleButton';
 import { useTranslation } from 'react-i18next';
 import { changeLanguage } from 'i18next';
 
@@ -129,13 +129,6 @@ export default function LoginScreen() {
           style={[styles.botao,{backgroundColor:"#03FF5F"}]}
         >
           <Text>PT</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          onPress={()=>mudarIdioma("es")}
-          style={[styles.botao,{backgroundColor:"#F1DA05"}]}
-        >
-          <Text>ES</Text>
         </TouchableOpacity>
       </View>
       <ThemeToggleButton/>

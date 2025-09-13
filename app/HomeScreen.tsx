@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Button, Text, TextInput, StyleSheet,Alert, FlatList, ActivityIndicator } from "react-native"
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { auth,db,collection,addDoc,getDocs } from "../src/services/firebaseConfig"
 import { deleteUser } from "firebase/auth";
@@ -12,7 +12,8 @@ import * as Notifications from "expo-notifications"
 
 Notifications.setNotificationHandler({
     handleNotification:async()=>({
-        shouldShowAlert:true,
+        shouldShowBanner:true,//Exibe o banner
+        shouldShowList:true,//Mostra histórico
         shouldPlaySound:true,//Toca o som
         shouldSetBadge:false//Não altera o badge
     })
@@ -164,6 +165,7 @@ export default function HomeScreen() {
         <Button title="EXCLUIR CONTA" color="red" onPress={excluirConta}/>
         <Button title="TROCAR A SENHA" onPress={()=>(router.replace("/AlterarSenhaScreen"))}/>
         <Button title="DISPARAR NOTIFICAÇÃO" color="purple" onPress={dispararNotificacao}/>
+        <Link href="CadastrarTarefa" style={{marginTop:20,color:colors.text,marginLeft:150,fontWeight:600}}>Cadastrar Tarefa</Link>
 
         {listaItems.length<=0?<ActivityIndicator/>:(
           <FlatList
