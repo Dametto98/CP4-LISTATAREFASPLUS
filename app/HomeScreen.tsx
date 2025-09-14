@@ -3,36 +3,27 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Button, Text, TextInput, StyleSheet,Alert, FlatList, ActivityIndicator } from "react-native"
 import { Link, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { auth,db,collection,addDoc,getDocs } from "../src/services/firebaseConfig"
+import { auth,db,collection,getDocs,query, where } from "../src/services/firebaseConfig"
 import { deleteUser } from "firebase/auth";
 import ItemLoja from "../src/components/ItemLoja";
 import ThemeToggleButton from "../src/components/ThemeToggleButton";
 import { useTheme } from "../src/context/ThemeContext";
 import * as Notifications from "expo-notifications"
 
-Notifications.setNotificationHandler({
-    handleNotification:async()=>({
-        shouldShowBanner:true,//Exibe o banner
-        shouldShowList:true,//Mostra histórico
-        shouldPlaySound:true,//Toca o som
-        shouldSetBadge:false//Não altera o badge
-    })
-})
-
 export default function HomeScreen() {
   const {theme,colors} = useTheme()//Vai acessar os valores do tema
   const router = useRouter()
-  const[nomeProduto,setNomeProduto]=useState('')
   const[expoPushToken,setExpoPushToken]=useState<string|null>(null)
 
   interface Item{
     id:string,
     title:string,
     description:string,
-    completed:boolean,
+    isCompleted:boolean,
     dueDate:string,
     createdAt:string,
-    updatedAt:string
+    updatedAt:string,
+    userId:string
   }
   const[listaItems,setListaItems]=useState<Item[]>([])
 
@@ -69,83 +60,37 @@ export default function HomeScreen() {
     )
   }
 
-  const buscarProdutos = async ()=>{
-    try{
-      const querySnapshot = await getDocs(collection(db, 'items'))
-      const items:any = []
+  const buscarProdutos = async () => {
+  try {
+    const user = auth.currentUser;
 
-      querySnapshot.forEach((item)=>{
-        items.push({
-          ...item.data(),
-          id: item.id
-        })
-      })
-      setListaItems(items)
-      // console.log("Itens carregados: ", items);
-      
-    }catch(e){
-      console.log("Erro ao carregar os items: ",e);
-      
-    }
+    const itemsCollectionRef = collection(db, 'items');
+    const q = query(itemsCollectionRef, where("userId", "==", user.uid));
+
+    const querySnapshot = await getDocs(q);
+    const items: any = [];
+
+    querySnapshot.forEach((doc) => {
+      items.push({
+        ...doc.data(),
+        id: doc.id
+      });
+    });
+
+    setListaItems(items);
+    
+  } catch (e) {
+    console.log("Erro ao carregar os items: ", e);
+    Alert.alert("Erro", "Não foi possível carregar as tarefas.");
   }
-
-  //Funçaõ para disparar a notificação local
-  const dispararNotificacao = async()=>{
-    await Notifications.scheduleNotificationAsync({
-      content:{
-          title:"Promoções do dia!",
-          body:"Aproveite as melhores ofertas"
-      },
-      trigger:{
-          type:"timeInterval",//tipo de trigger: intervalo de tempo
-          seconds:2,//aguarda 02 segundos para disparar
-          repeats:false
-      } as Notifications.TimeIntervalTriggerInput
-    })
-  }
-
-  const registerForPushNotificationsAsync = async ():Promise<string|null> =>{
-      try{
-          const tokenData = await Notifications.getExpoPushTokenAsync()
-          const token  = tokenData.data
-          console.log("Token gerado com sucesso: ",token)
-          return token
-      }catch(error){
-          console.log("Error ao gerar token",error)
-          return null
-      }
-  }
-  useEffect(()=>{
-        //Ficar escutando se houve recebimento de notificação
-        const subscription = Notifications.addNotificationReceivedListener(notification =>{
-            console.log("Notificação recebida: ", notification)
-        })
-        //Função de limpeza que irá ser chamada quando for desfeito
-        //Remove o listener para evitar multiplas chamadas.
-        return ()=>subscription.remove()
-    },[])
-
-  useEffect(()=>{
-    //Solicitar a permissão das notificações do aparelho
-    (async()=>{
-      //Verifica o stests da permissão das notificações do dispositivo
-      const{status:existingStatus} = await Notifications.getPermissionsAsync()
-      let finalStatus = existingStatus
-
-      //Solicita a permissão das notificações do dispositivo
-      if(existingStatus!=="granted"){
-        const{status} = await Notifications.requestPermissionsAsync()
-        finalStatus=status
-      }
-    })()
-  },[])
+};
 
   useEffect(()=>{
     buscarProdutos()
   },[listaItems])
   return (
-    <SafeAreaView style={[styles.container,
-      // {backgroundColor:theme ==='dark'?'#121212':'#fff'}
+    <SafeAreaView style={[
+      styles.container,
       {backgroundColor:colors.background}
     ]}>
         <Text style={[{color:colors.text}]}>Seja bem-vindo(a), você está logado(a)!</Text>
@@ -153,8 +98,8 @@ export default function HomeScreen() {
         <Button title="REALIZAR LOGOFF" onPress={realizarLogoff}/>
         <Button title="EXCLUIR CONTA" color="red" onPress={excluirConta}/>
         <Button title="TROCAR A SENHA" onPress={()=>(router.replace("/AlterarSenhaScreen"))}/>
-        <Button title="DISPARAR NOTIFICAÇÃO" color="purple" onPress={dispararNotificacao}/>
         <Link href="CadastrarTarefa" style={{marginTop:20,color:colors.text,marginLeft:150,fontWeight:600}}>Cadastrar Tarefa</Link>
+        <Link href="Versiculos" style={{marginTop:20,color:colors.text,marginLeft:150,fontWeight:600}}>Versiculo</Link>
 
         {listaItems.length<=0?<ActivityIndicator/>:(
           <FlatList
@@ -162,8 +107,12 @@ export default function HomeScreen() {
             renderItem={({item})=>{
               return(
                 <ItemLoja 
-                  nomeProduto={item.nomeProduto}
-                  isChecked={item.isChecked}
+                  title={item.title}
+                  description={item.description}
+                  isCompleted={item.isCompleted}
+                  dueDate={item.dueDate}
+                  createdAt={item.createdAt}
+                  updatedAt={item.updatedAt}
                   id={item.id}
                 />
               )

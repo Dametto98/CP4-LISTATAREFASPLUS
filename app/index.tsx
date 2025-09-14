@@ -1,14 +1,22 @@
 import { Link } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import { sendPasswordResetEmail, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithCredential} from 'firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '../src/services/firebaseConfig';
 import { useTheme } from '../src/context/ThemeContext';
 import ThemeToggleButton from '../src/components/ThemeToggleButton';
 import { useTranslation } from 'react-i18next';
+import { FontAwesome } from '@expo/vector-icons';
 import { changeLanguage } from 'i18next';
+
+const WEB_CLIENT_ID = '1024555257607-egqipkahpr73onb7j2hara1mjcviijio.apps.googleusercontent.com';
+
+GoogleSignin.configure({
+  webClientId: WEB_CLIENT_ID,
+});
 
 export default function LoginScreen() {
   //Hook que fornece a funcção 't' para a tradução do idioma
@@ -66,6 +74,54 @@ export default function LoginScreen() {
       });
   };
 
+  const handleGoogleLogin = async () => {
+    if (Platform.OS === 'web') {
+      await handleGoogleLoginWeb();
+    } else {
+      await handleGoogleLoginNative();
+    }
+  };
+
+  const handleGoogleLoginWeb = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      await AsyncStorage.setItem('@user', JSON.stringify(user));
+      router.push('/HomeScreen');
+    } catch (error) {
+      console.error("Erro no login com Google (Web):", error);
+      Alert.alert("Erro", "Não foi possível fazer o login com o Google.");
+    }
+  };
+
+  // --- FUNÇÃO CORRIGIDA ---
+  const handleGoogleLoginNative = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = userInfo.idToken;
+
+      if (!idToken) {
+        throw new Error('O idToken não foi retornado pelo Google Sign-In.');
+      }
+      
+      const googleCredential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, googleCredential);
+      
+      const user = userCredential.user;
+      await AsyncStorage.setItem('@user', JSON.stringify(user));
+      router.push('/HomeScreen');
+
+    } catch (error) {
+      console.log("Erro no login com Google (Nativo):", error);
+      if (error.code === '12501') { 
+        return; // O usuário cancelou o login, não é um erro.
+      }
+      Alert.alert("Erro", "Não foi possível fazer o login com o Google.");
+    }
+  };
+
   const esqueceuSenha = () =>{
     if(!email){
       alert("Digite o e-mail para recuperar a senha")
@@ -111,6 +167,11 @@ export default function LoginScreen() {
       <TouchableOpacity style={[styles.botao,{backgroundColor:colors.button}]} onPress={handleLogin}>
         <Text style={styles.textoBotao}>Login</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={[styles.botao, styles.googleButton]} 
+        onPress={handleGoogleLogin} // Apenas chama a nova função
+      ></TouchableOpacity>
 
       <View style={
         {flexDirection:'row',
@@ -172,4 +233,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  googleButton: {
+    backgroundColor: '#4285F4', // Cor oficial do Google para Web
+    marginTop: 10,
+  }
 });
