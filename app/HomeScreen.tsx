@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context"
-import { Button, Text, TextInput, StyleSheet,Alert, FlatList, ActivityIndicator } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Text, StyleSheet, Alert, FlatList, ActivityIndicator, View, TouchableOpacity } from "react-native";
 import { Link, useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { auth,db,collection,getDocs,query, where } from "../src/services/firebaseConfig"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { auth, db, collection, getDocs, query, where } from "../src/services/firebaseConfig";
 import { deleteUser } from "firebase/auth";
-import ItemLoja from "../src/components/ItemLoja";
+import Tarefas from "../src/components/Tarefas";
 import ThemeToggleButton from "../src/components/ThemeToggleButton";
 import { useTheme } from "../src/context/ThemeContext";
-import * as Notifications from "expo-notifications"
 
 export default function HomeScreen() {
   const {theme,colors} = useTheme()//Vai acessar os valores do tema
@@ -88,52 +87,64 @@ export default function HomeScreen() {
   useEffect(()=>{
     buscarProdutos()
   },[listaItems])
+
+  // Estilos dinâmicos com base no tema
+  const dynamicStyles = StyleSheet.create({
+    container: { flex: 1, padding: 20, backgroundColor: colors.background },
+    titulo: { fontSize: 26, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: colors.text },
+    botaoContainer: { marginVertical: 15, gap: 10 },
+    button: {
+      backgroundColor: colors.button,
+      paddingVertical: 12,
+      borderRadius: 10,
+      alignItems: "center",
+      marginVertical: 5,
+    },
+    buttonText: { color: colors.buttonText, fontSize: 16, fontWeight: "bold" },
+    linkContainer: { flexDirection: "row", justifyContent: "space-around", marginVertical: 10 },
+    link: { fontWeight: "600", fontSize: 16, color: colors.text },
+    flatList: { marginTop: 20 },
+    themeButtonContainer: { flexDirection: "row", justifyContent: "flex-end", marginBottom: 10 },
+  });
+
   return (
-    <SafeAreaView style={[
-      styles.container,
-      {backgroundColor:colors.background}
-    ]}>
-        <Text style={[{color:colors.text}]}>Seja bem-vindo(a), você está logado(a)!</Text>
-        <ThemeToggleButton/>
-        <Button title="REALIZAR LOGOFF" onPress={realizarLogoff}/>
-        <Button title="EXCLUIR CONTA" color="red" onPress={excluirConta}/>
-        <Button title="TROCAR A SENHA" onPress={()=>(router.replace("/AlterarSenhaScreen"))}/>
-        <Link href="CadastrarTarefa" style={{marginTop:20,color:colors.text,marginLeft:150,fontWeight:600}}>Cadastrar Tarefa</Link>
-        <Link href="Versiculos" style={{marginTop:20,color:colors.text,marginLeft:150,fontWeight:600}}>Versiculo</Link>
+    <SafeAreaView style={dynamicStyles.container}>
+      {/* Botão de alternar tema */}
+      <View style={dynamicStyles.themeButtonContainer}>
+        <ThemeToggleButton />
+      </View>
 
-        {listaItems.length<=0?<ActivityIndicator/>:(
-          <FlatList
-            data={listaItems}
-            renderItem={({item})=>{
-              return(
-                <ItemLoja 
-                  title={item.title}
-                  description={item.description}
-                  isCompleted={item.isCompleted}
-                  dueDate={item.dueDate}
-                  createdAt={item.createdAt}
-                  updatedAt={item.updatedAt}
-                  id={item.id}
-                />
-              )
-            }}
-          />
-        )}
+      <Text style={dynamicStyles.titulo}>Bem-vindo(a)!</Text>
 
+      <View style={dynamicStyles.botaoContainer}>
+        <TouchableOpacity style={dynamicStyles.button} onPress={realizarLogoff}>
+          <Text style={dynamicStyles.buttonText}>LOGOFF</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[dynamicStyles.button, { backgroundColor: "#FF3B30" }]} onPress={excluirConta}>
+          <Text style={dynamicStyles.buttonText}>EXCLUIR CONTA</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={dynamicStyles.button} onPress={() => router.replace("/AlterarSenhaScreen")}>
+          <Text style={dynamicStyles.buttonText}>TROCAR SENHA</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={dynamicStyles.linkContainer}>
+        <Link href="CadastrarTarefa" style={dynamicStyles.link}>Cadastrar Tarefa</Link>
+        <Link href="Versiculos" style={dynamicStyles.link}>Versículo</Link>
+      </View>
+
+      {listaItems.length === 0 ? (
+        <ActivityIndicator size="large" color={colors.button} style={{ marginTop: 20 }} />
+      ) : (
+        <FlatList
+          data={listaItems}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => <Tarefas {...item} />}
+          style={dynamicStyles.flatList}
+        />
+      )}
     </SafeAreaView>
-  )
+  );
 }
-
-const styles = StyleSheet.create({
-  container:{
-    flex:1
-  },
-  input:{
-    backgroundColor:'lightgray',
-    width:'90%',
-    alignSelf:'center',
-    marginTop:'auto',
-    borderRadius:10,
-    paddingLeft:20
-  }
-})

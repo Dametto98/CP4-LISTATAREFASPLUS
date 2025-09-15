@@ -1,118 +1,95 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from "../src/services/firebaseConfig"
+import { auth } from "../src/services/firebaseConfig";
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../src/context/ThemeContext';
+import ThemeToggleButton from '../src/components/ThemeToggleButton';
 
 export default function CadastroScreen() {
-  const{colors} = useTheme()
-  // Estados para armazenar os valores digitados
+  const { colors } = useTheme();
+
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
   const router = useRouter();
 
-  // Função para simular o envio do formulário
   const handleCadastro = () => {
     if (!nome || !email || !senha) {
       Alert.alert('Atenção', 'Preencha todos os campos!');
       return;
     }
-    //Implementação do backend
+
     createUserWithEmailAndPassword(auth, email, senha)
-      .then(async(userCredential)=>{
-        const user = userCredential.user
-        console.log(user);
-        await AsyncStorage.setItem('@user', JSON.stringify(user))
-        router.push('/HomeScreen')
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        await AsyncStorage.setItem('@user', JSON.stringify(user));
+        router.push('/HomeScreen');
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorMessage);
-        alert("Usuário não cadastrado!")
+        console.log(error.message);
+        Alert.alert("Erro", "Usuário não cadastrado!");
       });
   };
 
-  return (
-    <View style={[styles.container,{backgroundColor:colors.background}]}>
-      <Text style={[styles.titulo,{color:colors.text}]}>Criar Conta</Text>
+  const dynamicStyles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', padding: 20 },
+    themeButtonContainer: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10 },
+    titulo: { fontSize: 28, fontWeight: 'bold', color: colors.text, marginBottom: 30, textAlign: 'center' },
+    input: {
+      backgroundColor: colors.inputBackground,
+      color: colors.text,
+      borderRadius: 10,
+      padding: 15,
+      marginBottom: 15,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: colors.border
+    },
+    botao: { backgroundColor: colors.button, padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 10 },
+    textoBotao: { color: colors.buttonText, fontSize: 18, fontWeight: 'bold' },
+  });
 
-      {/* Campo Nome */}
+  return (
+    <View style={dynamicStyles.container}>
+      <View style={dynamicStyles.themeButtonContainer}>
+        <ThemeToggleButton />
+      </View>
+
+      <Text style={dynamicStyles.titulo}>Criar Conta</Text>
+
       <TextInput
-        style={styles.input}
+        style={dynamicStyles.input}
         placeholder="Nome completo"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colors.text}
         value={nome}
         onChangeText={setNome}
       />
 
-      {/* Campo Email */}
       <TextInput
-        style={styles.input}
+        style={dynamicStyles.input}
         placeholder="E-mail"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colors.text}
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
       />
 
-      {/* Campo Senha */}
       <TextInput
-        style={styles.input}
+        style={dynamicStyles.input}
         placeholder="Senha"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colors.text}
         secureTextEntry
         value={senha}
         onChangeText={setSenha}
       />
 
-      {/* Botão */}
-      <TouchableOpacity style={[styles.botao,{backgroundColor:colors.button}]} onPress={handleCadastro}>
-        <Text style={styles.textoBotao}>Cadastrar</Text>
+      <TouchableOpacity style={dynamicStyles.botao} onPress={handleCadastro}>
+        <Text style={dynamicStyles.textoBotao}>Cadastrar</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-// Estilização
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  titulo: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#1E1E1E',
-    color: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  botao: {
-    backgroundColor: '#00B37E',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  textoBotao: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});

@@ -1,150 +1,130 @@
 import { Link } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { sendPasswordResetEmail, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithCredential} from 'firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../src/services/firebaseConfig';
 import { useTheme } from '../src/context/ThemeContext';
 import ThemeToggleButton from '../src/components/ThemeToggleButton';
 import { useTranslation } from 'react-i18next';
-import { FontAwesome } from '@expo/vector-icons';
-import { changeLanguage } from 'i18next';
-
-const WEB_CLIENT_ID = '1024555257607-egqipkahpr73onb7j2hara1mjcviijio.apps.googleusercontent.com';
-
-GoogleSignin.configure({
-  webClientId: WEB_CLIENT_ID,
-});
 
 export default function LoginScreen() {
-  //Hook que fornece a funcção 't' para a tradução do idioma
-  const{t,i18n}=useTranslation()
+  const { t, i18n } = useTranslation();
+  const { colors } = useTheme();
+  const router = useRouter();
 
-  //Função para mudar o idioma
-  const mudarIdioma = (lang:string)=>{
-    i18n.changeLanguage(lang)
-  }
-
-  //Colors do ThemeContext
-  const {theme,colors} = useTheme()
-  // Estados para armazenar os valores digitados
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  const router = useRouter()//Hook de navegação
-
-  useEffect(()=>{
-    const verificarusuarioLogado = async()=>{
-      try{
-        const usuarioSalvo = await AsyncStorage.getItem("@user")
-        if(usuarioSalvo){
-          router.push('/HomeScreen')//Redireciona para a tela HomeScreen(Usuario logado)
-        }
-
-      }catch(error){
-        console.log("Erro ao verificar login", error)        
+  useEffect(() => {
+    const verificarUsuarioLogado = async () => {
+      try {
+        const usuarioSalvo = await AsyncStorage.getItem('@user');
+        if (usuarioSalvo) router.push('/HomeScreen');
+      } catch (error) {
+        console.log('Erro ao verificar login', error);
       }
-    }
-    verificarusuarioLogado()//chama a função
-  },[])
+    };
+    verificarUsuarioLogado();
+  }, []);
 
-  // Função para simular o envio do formulário
-  const handleLogin= () => {
-    if ( !email || !senha) {
-      Alert.alert('Atenção', 'Preencha todos os campos!');
-      return;
-    }
-    //Backend do login
+  const handleLogin = () => {
+    if (!email || !senha) return Alert.alert('Atenção', 'Preencha todos os campos!');
     signInWithEmailAndPassword(auth, email, senha)
-      .then(async(userCredential) => {
- 
-        const user = userCredential.user;
-        await AsyncStorage.setItem('@user',JSON.stringify(user))
-        router.push('/HomeScreen')
+      .then(async ({ user }) => {
+        await AsyncStorage.setItem('@user', JSON.stringify(user));
+        router.push('/HomeScreen');
       })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("Error: ", errorMessage);
-        if(error.code==="auth/invalid-credential"){
-          Alert.alert("Atenção","E-Mail ou Senha incorreto!")
-        }
-      });
+      .catch(() => Alert.alert('Atenção', 'E-mail ou senha incorretos!'));
   };
 
-  const handleGoogleLogin = async () => {
-    if (Platform.OS === 'web') {
-      await handleGoogleLoginWeb();
-    } else {
-      await handleGoogleLoginNative();
-    }
+  const esqueceuSenha = () => {
+    if (!email) return Alert.alert('Atenção', 'Digite o e-mail para recuperar a senha');
+    sendPasswordResetEmail(auth, email)
+      .then(() => Alert.alert('Sucesso', 'Email de recuperação enviado'))
+      .catch(() => Alert.alert('Erro', 'Não foi possível enviar o e-mail'));
   };
 
-  const handleGoogleLoginWeb = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      await AsyncStorage.setItem('@user', JSON.stringify(user));
-      router.push('/HomeScreen');
-    } catch (error) {
-      console.error("Erro no login com Google (Web):", error);
-      Alert.alert("Erro", "Não foi possível fazer o login com o Google.");
-    }
-  };
+  const mudarIdioma = (lang: string) => i18n.changeLanguage(lang);
 
-  // --- FUNÇÃO CORRIGIDA ---
-  const handleGoogleLoginNative = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      const idToken = userInfo.idToken;
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      padding: 20,
+      backgroundColor: colors.background,
+    },
+    themeButtonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginBottom: 10,
+    },
+    titulo: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 30,
+      textAlign: 'center',
+      color: colors.text,
+    },
+    input: {
+      borderWidth: 2,
+      borderRadius: 10,
+      padding: 15,
+      marginBottom: 15,
+      fontSize: 16,
+      color: colors.text,
+      backgroundColor: colors.inputBackground,
+      borderColor: colors.border,
+    },
+    botao: {
+      padding: 15,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginBottom: 10,
+      backgroundColor: colors.button,
+    },
+    textoBotao: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: colors.buttonText,
+    },
+    containerIdiomas: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginVertical: 15,
+      gap: 10,
+    },
+    botaoIdioma: {
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    textoIdioma: {
+      color: '#fff',
+      fontWeight: 'bold',
+    },
+    link: {
+      textAlign: 'center',
+      marginTop: 15,
+      fontWeight: '600',
+      fontSize: 16,
+      color: colors.text,
+    },
+  });
 
-      if (!idToken) {
-        throw new Error('O idToken não foi retornado pelo Google Sign-In.');
-      }
-      
-      const googleCredential = GoogleAuthProvider.credential(idToken);
-      const userCredential = await signInWithCredential(auth, googleCredential);
-      
-      const user = userCredential.user;
-      await AsyncStorage.setItem('@user', JSON.stringify(user));
-      router.push('/HomeScreen');
-
-    } catch (error) {
-      console.log("Erro no login com Google (Nativo):", error);
-      if (error.code === '12501') { 
-        return; // O usuário cancelou o login, não é um erro.
-      }
-      Alert.alert("Erro", "Não foi possível fazer o login com o Google.");
-    }
-  };
-
-  const esqueceuSenha = () =>{
-    if(!email){
-      alert("Digite o e-mail para recuperar a senha")
-      return
-    }
-    sendPasswordResetEmail(auth,email)
-      .then(()=>{
-        alert("Email de recuperação enviado")
-      })
-      .catch((error)=>{
-        console.log("Error",error.message)
-        alert("Erro ao enviar e-mail de reset de senha")
-      })
-
-  }
   return (
-    <View style={[styles.container,{backgroundColor:colors.background}]}>
-      <Text style={[styles.titulo,{color:colors.text}]}>{t("login")}</Text>
+    <SafeAreaView style={dynamicStyles.container}>
+      {/* Botão de tema */}
+      <View style={dynamicStyles.themeButtonContainer}>
+        <ThemeToggleButton />
+      </View>
 
+      <Text style={dynamicStyles.titulo}>{t('login')}</Text>
 
-      {/* Campo Email */}
       <TextInput
-        style={[styles.input,{color:colors.text}]}
+        style={dynamicStyles.input}
         placeholder="E-mail"
         placeholderTextColor={colors.text}
         keyboardType="email-address"
@@ -152,89 +132,35 @@ export default function LoginScreen() {
         value={email}
         onChangeText={setEmail}
       />
-
-      {/* Campo Senha */}
       <TextInput
-        style={[styles.input,{color:colors.text}]}
-        placeholder={t("password")}
+        style={dynamicStyles.input}
+        placeholder={t('password')}
         placeholderTextColor={colors.text}
         secureTextEntry
         value={senha}
         onChangeText={setSenha}
       />
 
-      {/* Botão */}
-      <TouchableOpacity style={[styles.botao,{backgroundColor:colors.button}]} onPress={handleLogin}>
-        <Text style={styles.textoBotao}>Login</Text>
+      <TouchableOpacity style={dynamicStyles.botao} onPress={handleLogin}>
+        <Text style={dynamicStyles.textoBotao}>Login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={[styles.botao, styles.googleButton]} 
-        onPress={handleGoogleLogin} // Apenas chama a nova função
-      ></TouchableOpacity>
-
-      <View style={
-        {flexDirection:'row',
-         justifyContent:'center',
-         marginTop:15,
-         gap:5}}>
-        <TouchableOpacity 
-          onPress={()=>mudarIdioma("en")} 
-          style={[styles.botao,{backgroundColor:"#FF5D5D"}]}
-        >
-          <Text>EN</Text>
+      {/* Idiomas */}
+      <View style={dynamicStyles.containerIdiomas}>
+        <TouchableOpacity style={[dynamicStyles.botaoIdioma, { backgroundColor: '#FF5D5D' }]} onPress={() => mudarIdioma('en')}>
+          <Text style={dynamicStyles.textoIdioma}>EN</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity 
-          onPress={()=>mudarIdioma("pt")}
-          style={[styles.botao,{backgroundColor:"#03FF5F"}]}
-        >
-          <Text>PT</Text>
+        <TouchableOpacity style={[dynamicStyles.botaoIdioma, { backgroundColor: '#03FF5F' }]} onPress={() => mudarIdioma('pt')}>
+          <Text style={dynamicStyles.textoIdioma}>PT</Text>
         </TouchableOpacity>
       </View>
-      <ThemeToggleButton/>
 
-      <Link href="CadastrarScreen" style={{marginTop:20,color:colors.text,marginLeft:150,fontWeight:600}}>{t("signup")}</Link>
-      
-      <Text style={{marginTop:20,color:colors.text,marginLeft:130,fontWeight:600}} onPress={esqueceuSenha}>{t("forgotpswd")}</Text>
-    </View>
+      <Link href="CadastrarScreen" style={dynamicStyles.link}>
+        {t('signup')}
+      </Link>
+      <Text style={dynamicStyles.link} onPress={esqueceuSenha}>
+        {t('forgotpswd')}
+      </Text>
+    </SafeAreaView>
   );
 }
-
-// Estilização
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  titulo: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  input: {
-    color: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    borderWidth: 2,
-    borderColor: '#333',
-  },
-  botao: {
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  textoBotao: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  googleButton: {
-    backgroundColor: '#4285F4', // Cor oficial do Google para Web
-    marginTop: 10,
-  }
-});

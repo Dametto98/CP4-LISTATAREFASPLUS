@@ -1,118 +1,128 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { updatePassword,reauthenticateWithCredential , EmailAuthProvider} from 'firebase/auth';
-import { auth } from "../src/services/firebaseConfig"
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView } from 'react-native';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { auth } from "../src/services/firebaseConfig";
 import { useRouter } from 'expo-router';
-
+import { useTheme } from '../src/context/ThemeContext';
+import ThemeToggleButton from '../src/components/ThemeToggleButton';
 
 export default function AlterarSenhaScreen() {
-  // Estados para armazenar os valores digitados
+  const { colors } = useTheme();
+  const router = useRouter();
+
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
 
-  const router = useRouter()//Hook de navegação..
-
-  //Função de atualizar Senha
-    const handleAlterarSenha = async()=>{
-        if(!novaSenha || !confirmarSenha || !senhaAtual){
-            Alert.alert("Atenção","Preencha todos os campos!")
-            return
-        }
-        try{
-            const user = auth.currentUser;
-            if(!user || !user.email){
-                Alert.alert("Error","Nenhum usuário logado")
-                return
-            }
-            //Criar as credenciais com email e senha atual para reautenticar
-            const credential = EmailAuthProvider.credential(user.email,senhaAtual);
-            await reauthenticateWithCredential(user,credential)
-
-            //Após autenticar, atualizar/alterar a senha
-            await updatePassword(user,novaSenha)
-            Alert.alert("Sucesso","Senha alterada com sucesso")
-            router.push("/HomeScreen") 
-        }catch(error:any){
-          console.log("Erro ao alterar senha")
-        }
+  const handleAlterarSenha = async () => {
+    if (!novaSenha || !confirmarSenha || !senhaAtual) {
+      Alert.alert("Atenção", "Preencha todos os campos!");
+      return;
+    }
+    if (novaSenha !== confirmarSenha) {
+      Alert.alert("Atenção", "As senhas não conferem!");
+      return;
     }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Criar Conta</Text>
+    try {
+      const user = auth.currentUser;
+      if (!user || !user.email) {
+        Alert.alert("Erro", "Nenhum usuário logado");
+        return;
+      }
+      const credential = EmailAuthProvider.credential(user.email, senhaAtual);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, novaSenha);
+      Alert.alert("Sucesso", "Senha alterada com sucesso");
+      router.push("/HomeScreen");
+    } catch (error: any) {
+      console.log("Erro ao alterar senha:", error);
+      Alert.alert("Erro", "Não foi possível alterar a senha");
+    }
+  };
 
-      {/* Campo Nome */}
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      padding: 20,
+    },
+    themeButtonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginBottom: 10,
+    },
+    titulo: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 30,
+      textAlign: 'center',
+    },
+    input: {
+      backgroundColor: colors.inputBackground,
+      color: colors.text,
+      borderRadius: 10,
+      padding: 15,
+      marginBottom: 15,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    botao: {
+      backgroundColor: colors.button,
+      padding: 15,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    textoBotao: {
+      color: colors.buttonText,
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+  });
+
+  return (
+    <SafeAreaView style={dynamicStyles.container}>
+      {/* Botão de tema */}
+      <View style={dynamicStyles.themeButtonContainer}>
+        <ThemeToggleButton />
+      </View>
+
+      <Text style={dynamicStyles.titulo}>Alterar Senha</Text>
+
       <TextInput
-        style={styles.input}
+        style={dynamicStyles.input}
         placeholder="Digite a senha atual"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={colors.text}
         value={senhaAtual}
         onChangeText={setSenhaAtual}
+        secureTextEntry
       />
 
-      {/* Campo Email */}
       <TextInput
-        style={styles.input}
+        style={dynamicStyles.input}
         placeholder="Digite a nova senha"
-        placeholderTextColor="#aaa"
-        secureTextEntry
+        placeholderTextColor={colors.text}
         value={novaSenha}
         onChangeText={setNovaSenha}
+        secureTextEntry
       />
 
-      {/* Campo Senha */}
       <TextInput
-        style={styles.input}
+        style={dynamicStyles.input}
         placeholder="Confirme a nova senha"
-        placeholderTextColor="#aaa"
-        secureTextEntry
+        placeholderTextColor={colors.text}
         value={confirmarSenha}
         onChangeText={setConfirmarSenha}
+        secureTextEntry
       />
 
-      {/* Botão */}
-      <TouchableOpacity style={styles.botao} onPress={handleAlterarSenha}>
-        <Text style={styles.textoBotao}>Alterar Senha</Text>
+      <TouchableOpacity style={dynamicStyles.botao} onPress={handleAlterarSenha}>
+        <Text style={dynamicStyles.textoBotao}>Alterar Senha</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
-
-// Estilização
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  titulo: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#1E1E1E',
-    color: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  botao: {
-    backgroundColor: '#00B37E',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  textoBotao: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
