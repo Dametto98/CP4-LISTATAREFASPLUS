@@ -1,16 +1,18 @@
 import React from 'react'
 import { TouchableOpacity,Text,StyleSheet } from 'react-native'
 import { useTheme } from '../context/ThemeContext'
+import { useTranslation } from 'react-i18next';
 
 export default function ThemeToggleButton() {
     const{toggleTheme,colors} = useTheme()
+    const { t, i18n } = useTranslation();
 
     return (
         <TouchableOpacity 
             style={[styles.button,{backgroundColor:colors.button}]}
             onPress={toggleTheme}
         >
-            <Text style={[styles.text,{color:colors.buttonText}]}>Alternar tema</Text>
+            <Text style={[styles.text,{color:colors.buttonText}]}>{t('switchTheme')}</Text>
         </TouchableOpacity>
     )
 }

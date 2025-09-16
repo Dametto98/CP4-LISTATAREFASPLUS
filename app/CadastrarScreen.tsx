@@ -6,8 +6,10 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../src/context/ThemeContext';
 import ThemeToggleButton from '../src/components/ThemeToggleButton';
+import { useTranslation } from 'react-i18next';
 
 export default function CadastroScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   const [nome, setNome] = useState('');
@@ -58,11 +60,11 @@ export default function CadastroScreen() {
         <ThemeToggleButton />
       </View>
 
-      <Text style={dynamicStyles.titulo}>Criar Conta</Text>
+      <Text style={dynamicStyles.titulo}>{t('createAccount')}</Text>
 
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Nome completo"
+        placeholder={t('fullName')}
         placeholderTextColor={colors.text}
         value={nome}
         onChangeText={setNome}
@@ -80,7 +82,7 @@ export default function CadastroScreen() {
 
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Senha"
+        placeholder={t('password')}
         placeholderTextColor={colors.text}
         secureTextEntry
         value={senha}
@@ -88,7 +90,7 @@ export default function CadastroScreen() {
       />
 
       <TouchableOpacity style={dynamicStyles.botao} onPress={handleCadastro}>
-        <Text style={dynamicStyles.textoBotao}>Cadastrar</Text>
+        <Text style={dynamicStyles.textoBotao}>{t('register')}</Text>
       </TouchableOpacity>
     </View>
   );

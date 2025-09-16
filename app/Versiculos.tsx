@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../src/context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
-// --- 1. FUNÇÃO PARA BUSCAR OS DADOS DA API ---
+
 const fetchRandomVerse = async () => {
   const response = await fetch('https://bible-api.com/?random=verse&translation=almeida');
   if (!response.ok) {
@@ -15,6 +16,7 @@ const fetchRandomVerse = async () => {
 
 export default function VerseScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['randomVerse'],
@@ -87,7 +89,7 @@ export default function VerseScreen() {
     return (
       <View style={dynamicStyles.centered}>
         <ActivityIndicator size="large" color={colors.button} />
-        <Text style={dynamicStyles.infoText}>Buscando um versículo...</Text>
+        <Text style={dynamicStyles.infoText}>{t('lookingVerse')}</Text>
       </View>
     );
   }
@@ -95,10 +97,10 @@ export default function VerseScreen() {
   if (isError) {
     return (
       <View style={dynamicStyles.centered}>
-        <Text style={dynamicStyles.errorText}>Ocorreu um erro:</Text>
+        <Text style={dynamicStyles.errorText}>{t('errorOccurred')}</Text>
         <Text style={dynamicStyles.errorText}>{error.message}</Text>
         <TouchableOpacity style={dynamicStyles.button} onPress={() => refetch()}>
-          <Text style={dynamicStyles.buttonText}>Tentar Novamente</Text>
+          <Text style={dynamicStyles.buttonText}>{t('tryAgain')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -112,7 +114,7 @@ export default function VerseScreen() {
       </View>
 
       <TouchableOpacity style={dynamicStyles.button} onPress={() => refetch()}>
-        <Text style={dynamicStyles.buttonText}>Buscar Novo Versículo</Text>
+        <Text style={dynamicStyles.buttonText}>{t('getNewVerse')}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

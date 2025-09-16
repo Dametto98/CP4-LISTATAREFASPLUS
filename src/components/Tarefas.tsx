@@ -5,8 +5,10 @@ import { doc, updateDoc, db, deleteDoc } from '../services/firebaseConfig';
 import { format } from 'date-fns';
 import { Timestamp } from "firebase/firestore";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 export default function Tarefas(props: any) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [isCompleted, setIsCompleted] = useState(props.isCompleted);
 
@@ -43,9 +45,9 @@ export default function Tarefas(props: any) {
       <View style={styles.textContainer}>
         <Text style={[styles.texto, { color: colors.text, fontWeight: 'bold' }]}>{props.title}</Text>
         <Text style={[styles.texto, { color: colors.text }]}>{props.description}</Text>
-        <Text style={[styles.texto, { color: colors.text }]}>Até: {formatedDueDate}</Text>
-        <Text style={[styles.texto, { color: colors.text }]}>Criado em {formatedCreatedAt}</Text>
-        <Text style={[styles.texto, { color: colors.text }]}>Última modificação: {formatedUpdatedAt}</Text>
+        <Text style={[styles.texto, { color: colors.text }]}>{t('until')}                     {formatedDueDate}</Text>
+        <Text style={[styles.texto, { color: colors.text }]}>{t('createdOn')}         {formatedCreatedAt}</Text>
+        <Text style={[styles.texto, { color: colors.text }]}>{t('lastModified')}    {formatedUpdatedAt}</Text>
       </View>
 
       <View style={styles.actions}>

@@ -8,11 +8,12 @@ import { deleteUser } from "firebase/auth";
 import Tarefas from "../src/components/Tarefas";
 import ThemeToggleButton from "../src/components/ThemeToggleButton";
 import { useTheme } from "../src/context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const {theme,colors} = useTheme()//Vai acessar os valores do tema
   const router = useRouter()
-  const[expoPushToken,setExpoPushToken]=useState<string|null>(null)
 
   interface Item{
     id:string,
@@ -33,11 +34,11 @@ export default function HomeScreen() {
 
   const excluirConta = () =>{
     Alert.alert(
-      "Confirmar Exclusão",
-      "Tem certeza que deseja excluir sua conta? Essa ação não poderá ser revertida!",
+      t('deleteConfirmation'),
+      t('confirmDeleteText'),
       [
-        {text:"Cancelar",style:"cancel"},
-        {text:"Deletar",style:"destructive",
+        {text:t('cancel'),style:"cancel"},
+        {text:t('delete'),style:"destructive",
           onPress: async ()=>{
             try{
               const user = auth.currentUser;
@@ -47,11 +48,11 @@ export default function HomeScreen() {
                   Alert.alert("Conta Excluída","Sua conta foi excluída com sucesso.")
                   router.replace("/")//Redireciona para login
               }else{
-                  Alert.alert("Error","Nenhu usuário logado")
+                  Alert.alert("Error","Nenhum usuário logado")
               }
             }catch(error){
               console.log("Erro ao excluir a conta");
-              Alert.alert("Erro", "Não foi possível excluir a conta")              
+              Alert.alert("Error", "Não foi possível excluir a conta")              
             }
           }
         }
@@ -114,25 +115,25 @@ export default function HomeScreen() {
         <ThemeToggleButton />
       </View>
 
-      <Text style={dynamicStyles.titulo}>Bem-vindo(a)!</Text>
+      <Text style={dynamicStyles.titulo}>{t('welcome')}</Text>
 
       <View style={dynamicStyles.botaoContainer}>
         <TouchableOpacity style={dynamicStyles.button} onPress={realizarLogoff}>
-          <Text style={dynamicStyles.buttonText}>LOGOFF</Text>
+          <Text style={dynamicStyles.buttonText}>{t('logout')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[dynamicStyles.button, { backgroundColor: "#FF3B30" }]} onPress={excluirConta}>
-          <Text style={dynamicStyles.buttonText}>EXCLUIR CONTA</Text>
+          <Text style={dynamicStyles.buttonText}>{t('deleteAccount')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={dynamicStyles.button} onPress={() => router.replace("/AlterarSenhaScreen")}>
-          <Text style={dynamicStyles.buttonText}>TROCAR SENHA</Text>
+          <Text style={dynamicStyles.buttonText}>{t('changepswd')}</Text>
         </TouchableOpacity>
       </View>
 
       <View style={dynamicStyles.linkContainer}>
-        <Link href="CadastrarTarefa" style={dynamicStyles.link}>Cadastrar Tarefa</Link>
-        <Link href="Versiculos" style={dynamicStyles.link}>Versículo</Link>
+        <Link href="CadastrarTarefa" style={dynamicStyles.link}>{t('addTask')}</Link>
+        <Link href="Versiculos" style={dynamicStyles.link}>{t('verse')}</Link>
       </View>
 
       {listaItems.length === 0 ? (

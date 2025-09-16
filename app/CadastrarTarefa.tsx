@@ -7,6 +7,7 @@ import { Timestamp } from 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Notifications from 'expo-notifications';
 import ThemeToggleButton from '../src/components/ThemeToggleButton';
+import { useTranslation } from 'react-i18next';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -18,6 +19,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function CadastroScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -111,11 +113,11 @@ export default function CadastroScreen() {
         <ThemeToggleButton />
       </View>
 
-      <Text style={dynamicStyles.titulo}>Criar Tarefa</Text>
+      <Text style={dynamicStyles.titulo}>{t('createTask')}</Text>
 
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Título da tarefa"
+        placeholder={t('taskTitle')}
         placeholderTextColor={colors.text}
         value={title}
         onChangeText={setTitle}
@@ -123,14 +125,14 @@ export default function CadastroScreen() {
 
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Descrição da tarefa"
+        placeholder={t('taskDescription')}
         placeholderTextColor={colors.text}
         value={description}
         onChangeText={setDescription}
       />
 
       <TouchableOpacity style={dynamicStyles.datePickerButton} onPress={showDatepicker}>
-        <Text style={dynamicStyles.datePickerText}>Data/Hora: {formatDateTime(date)}</Text>
+        <Text style={dynamicStyles.datePickerText}>{t('dateTime')}{formatDateTime(date)}</Text>
       </TouchableOpacity>
 
       {show && (
@@ -145,7 +147,7 @@ export default function CadastroScreen() {
       )}
 
       <TouchableOpacity style={dynamicStyles.botao} onPress={handleCadastro}>
-        <Text style={dynamicStyles.textoBotao}>Cadastrar</Text>
+        <Text style={dynamicStyles.textoBotao}>{t('create')}</Text>
       </TouchableOpacity>
     </View>
   );

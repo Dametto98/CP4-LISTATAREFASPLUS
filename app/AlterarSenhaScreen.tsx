@@ -5,8 +5,11 @@ import { auth } from "../src/services/firebaseConfig";
 import { useRouter } from 'expo-router';
 import { useTheme } from '../src/context/ThemeContext';
 import ThemeToggleButton from '../src/components/ThemeToggleButton';
+import { useTranslation } from 'react-i18next';
+
 
 export default function AlterarSenhaScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const router = useRouter();
 
@@ -91,11 +94,11 @@ export default function AlterarSenhaScreen() {
         <ThemeToggleButton />
       </View>
 
-      <Text style={dynamicStyles.titulo}>Alterar Senha</Text>
+      <Text style={dynamicStyles.titulo}>{t('changepswd')}</Text>
 
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Digite a senha atual"
+        placeholder={t('currentpswd')}
         placeholderTextColor={colors.text}
         value={senhaAtual}
         onChangeText={setSenhaAtual}
@@ -104,7 +107,7 @@ export default function AlterarSenhaScreen() {
 
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Digite a nova senha"
+        placeholder={t('newpswd')}
         placeholderTextColor={colors.text}
         value={novaSenha}
         onChangeText={setNovaSenha}
@@ -113,7 +116,7 @@ export default function AlterarSenhaScreen() {
 
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Confirme a nova senha"
+        placeholder={t('confirmpswd')}
         placeholderTextColor={colors.text}
         value={confirmarSenha}
         onChangeText={setConfirmarSenha}
@@ -121,7 +124,7 @@ export default function AlterarSenhaScreen() {
       />
 
       <TouchableOpacity style={dynamicStyles.botao} onPress={handleAlterarSenha}>
-        <Text style={dynamicStyles.textoBotao}>Alterar Senha</Text>
+        <Text style={dynamicStyles.textoBotao}>{t('changepswd')}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
