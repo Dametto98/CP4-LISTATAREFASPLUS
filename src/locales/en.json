@@ -10,7 +10,7 @@
     "successDelete": "Your account has been deleted successfully.",
     "noLogged": "No user logged in",
     "cantDelete": "Unable to delete the account",
-    "changepswd":"Change Password",
+    "changePassword":"Change Password",
     "currentpswd":"Enter your current password",
     "newpswd":"Enter your new password",
     "confirmpswd":"Confirm your new password",

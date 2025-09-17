@@ -94,7 +94,7 @@ export default function AlterarSenhaScreen() {
         <ThemeToggleButton />
       </View>
 
-      <Text style={dynamicStyles.titulo}>{t('changepswd')}</Text>
+      <Text style={dynamicStyles.titulo}>{t('changePassword')}</Text>
 
       <TextInput
         style={dynamicStyles.input}
@@ -124,7 +124,7 @@ export default function AlterarSenhaScreen() {
       />
 
       <TouchableOpacity style={dynamicStyles.botao} onPress={handleAlterarSenha}>
-        <Text style={dynamicStyles.textoBotao}>{t('changepswd')}</Text>
+        <Text style={dynamicStyles.textoBotao}>{t('changePassword')}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

@@ -144,7 +144,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity style={dynamicStyles.button} onPress={() => router.replace("/AlterarSenhaScreen")}>
-          <Text style={dynamicStyles.buttonText}>{t('changepswd')}</Text>
+          <Text style={dynamicStyles.buttonText}>{t('changePassword')}</Text>
         </TouchableOpacity>
       </View>
 
