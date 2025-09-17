@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const {theme,colors} = useTheme()//Vai acessar os valores do tema
+  const {colors} = useTheme()//Vai acessar os valores do tema
   const router = useRouter()
 
   interface Item{
@@ -45,14 +45,14 @@ export default function HomeScreen() {
               if(user){
                   await deleteUser(user)
                   await AsyncStorage.removeItem('@user')
-                  Alert.alert("Conta Excluída","Sua conta foi excluída com sucesso.")
+                  Alert.alert(t("accountDeleted"),t("deleteSuccess"))
                   router.replace("/")//Redireciona para login
               }else{
-                  Alert.alert("Error","Nenhum usuário logado")
+                  Alert.alert(t("error"),t("noUserLogged"))
               }
             }catch(error){
               console.log("Erro ao excluir a conta");
-              Alert.alert("Error", "Não foi possível excluir a conta")              
+              Alert.alert(t("error"), t("deleteFail"))              
             }
           }
         }
@@ -80,8 +80,8 @@ export default function HomeScreen() {
     setListaItems(items);
     
   } catch (e) {
-    console.log("Erro ao carregar os items: ", e);
-    Alert.alert("Erro", "Não foi possível carregar as tarefas.");
+    console.log(t("taskLoadFail"), e);
+    Alert.alert(t("error"), t("loadItemsError"));
   }
 };
 

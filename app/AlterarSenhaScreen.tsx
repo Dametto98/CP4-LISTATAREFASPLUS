@@ -19,28 +19,28 @@ export default function AlterarSenhaScreen() {
 
   const handleAlterarSenha = async () => {
     if (!novaSenha || !confirmarSenha || !senhaAtual) {
-      Alert.alert("Atenção", "Preencha todos os campos!");
+      Alert.alert(t("attention"), t("fillFields"));
       return;
     }
     if (novaSenha !== confirmarSenha) {
-      Alert.alert("Atenção", "As senhas não conferem!");
+      Alert.alert(t("attention"), t("passwordsDoNotMatch"));
       return;
     }
 
     try {
       const user = auth.currentUser;
       if (!user || !user.email) {
-        Alert.alert("Erro", "Nenhum usuário logado");
+        Alert.alert(t("error"), t("noUserLogged"));
         return;
       }
       const credential = EmailAuthProvider.credential(user.email, senhaAtual);
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, novaSenha);
-      Alert.alert("Sucesso", "Senha alterada com sucesso");
+      Alert.alert(t("success"), t("passwordChangedSuccess"));
       router.push("/HomeScreen");
     } catch (error: any) {
       console.log("Erro ao alterar senha:", error);
-      Alert.alert("Erro", "Não foi possível alterar a senha");
+      Alert.alert(t("error"), t("passwordChangeFail"));
     }
   };
 

@@ -20,7 +20,7 @@ export default function CadastroScreen() {
 
   const handleCadastro = () => {
     if (!nome || !email || !senha) {
-      Alert.alert('Atenção', 'Preencha todos os campos!');
+      Alert.alert(t("attention"), t("fillFields"));
       return;
     }
 
@@ -32,7 +32,7 @@ export default function CadastroScreen() {
       })
       .catch((error) => {
         console.log(error.message);
-        Alert.alert("Erro", "Usuário não cadastrado!");
+        Alert.alert(t("error"), t("userNotRegistered"));
       });
   };
 

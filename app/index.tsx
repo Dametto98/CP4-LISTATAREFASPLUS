@@ -30,20 +30,20 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = () => {
-    if (!email || !senha) return Alert.alert('Atenção', 'Preencha todos os campos!');
+    if (!email || !senha) return Alert.alert(t('attention'), t('fillFields'));
     signInWithEmailAndPassword(auth, email, senha)
       .then(async ({ user }) => {
         await AsyncStorage.setItem('@user', JSON.stringify(user));
         router.push('/HomeScreen');
       })
-      .catch(() => Alert.alert('Atenção', 'E-mail ou senha incorretos!'));
+      .catch(() => Alert.alert(t('attention'), t('invalidCredentials')));
   };
 
   const esqueceuSenha = () => {
-    if (!email) return Alert.alert('Atenção', 'Digite o e-mail para recuperar a senha');
+    if (!email) return Alert.alert(t('attention'), t('emailForPasswordReset'));
     sendPasswordResetEmail(auth, email)
-      .then(() => Alert.alert('Sucesso', 'Email de recuperação enviado'))
-      .catch(() => Alert.alert('Erro', 'Não foi possível enviar o e-mail'));
+      .then(() => Alert.alert(t('success'), t('recoveryEmailSent')))
+      .catch(() => Alert.alert(t('error'), t('emailSendFail')));
   };
 
   const mudarIdioma = (lang: string) => i18n.changeLanguage(lang);

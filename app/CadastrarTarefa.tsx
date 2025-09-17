@@ -32,7 +32,7 @@ export default function CadastroScreen() {
     async function requestPermissions() {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permissão necessária', 'Você precisa permitir notificações para ser lembrado de suas tarefas!');
+        Alert.alert(t("permissionRequired"), t("notificationPermissionMessage"));
       }
     }
     requestPermissions();
@@ -65,7 +65,7 @@ export default function CadastroScreen() {
   const handleCadastro = async () => {
     const user = auth.currentUser;
     if (!title || !description) {
-      Alert.alert('Atenção', 'Preencha o título e a descrição!');
+      Alert.alert(t('attention'), t("fillTitleAndDescription"));
       return;
     }
 
@@ -81,7 +81,7 @@ export default function CadastroScreen() {
       });
       await scheduleTaskNotification(title, description, date);
 
-      Alert.alert("Sucesso", "Tarefa salva e notificação agendada!");
+      Alert.alert(t("success"), t("taskSavedAndNotificationScheduled"));
       setTitle('');
       setDescription('');
       setDate(new Date());
@@ -89,7 +89,7 @@ export default function CadastroScreen() {
 
     } catch (e) {
       console.log("Erro ao criar a tarefa:", e);
-      Alert.alert("Erro", "Não foi possível salvar a tarefa.");
+      Alert.alert(t("error"), t("taskSaveFail"));
     }
   };
 
