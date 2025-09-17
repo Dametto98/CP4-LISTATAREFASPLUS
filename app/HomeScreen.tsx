@@ -62,10 +62,26 @@ export default function HomeScreen() {
 
   const buscarProdutos = async () => {
   try {
+    const usuarioSalvo = await AsyncStorage.getItem('@user');
+    if (!usuarioSalvo) {
+      console.log('Usuário não encontrado no AsyncStorage');
+      return;
+    }
+
+    const usuario = JSON.parse(usuarioSalvo); 
+    const userId = usuario.uid; 
+
     const user = auth.currentUser;
+    
+    const currentUserId = user ? user.uid : userId;
+
+    if (!currentUserId) {
+      console.log('Não foi possível recuperar o userId');
+      return;
+    }
 
     const itemsCollectionRef = collection(db, 'items');
-    const q = query(itemsCollectionRef, where("userId", "==", user.uid));
+    const q = query(itemsCollectionRef, where("userId", "==", currentUserId));
 
     const querySnapshot = await getDocs(q);
     const items: any = [];
@@ -84,6 +100,7 @@ export default function HomeScreen() {
     Alert.alert(t("error"), t("loadItemsError"));
   }
 };
+
 
   useEffect(()=>{
     buscarProdutos()
